@@ -5,11 +5,19 @@ import express from "express";
 import { ERROR } from "./src/Constant.js";
 
 const app = express();
-const PORT = process.env.NODE_ENV || 8001;
+const PORT = process.env.NODE_ENV || 8000;
 
 //connecting to DB
 import { connectDB } from "./src/config/dbConfig.js";
+
 connectDB();
+
+//middlewares
+app.use(express.json()); // to parse the data that coming on post method into req.body, without this we do not have data coming
+
+//api routers
+import userRouter from "./src/routers/UserRouter.js";
+app.use("/api/v1/user", userRouter);
 
 //all uncaught request
 app.use("*", (req, res, next) => {
