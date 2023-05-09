@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors";
 import { ERROR } from "./src/Constant.js";
 
 const app = express();
@@ -14,6 +15,7 @@ connectDB();
 
 //middlewares
 app.use(express.json()); // to parse the data that coming on post method into req.body, without this we do not have data coming
+app.use(cors());
 
 //api routers
 import userRouter from "./src/routers/UserRouter.js";
@@ -28,7 +30,7 @@ app.use("*", (req, res, next) => {
 
 //global error handler
 app.use((error, req, res, next) => {
-  console.log(error);
+  console.log(error.message);
   const errorCode = error.code || 500;
   res.status(errorCode).json({
     status: ERROR,
