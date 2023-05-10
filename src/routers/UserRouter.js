@@ -1,7 +1,7 @@
 import express from "express";
 import { ERROR, SUCCESS } from "../Constant.js";
 import { createUser, getAnyUser } from "../models/userModel/UserModel.js";
-import { hashPassword } from "../helpers/BcryptHelper.js";
+import { comparePassword, hashPassword } from "../helpers/BcryptHelper.js";
 
 const router = express.Router(); // we want to define router here not app, because we not only want to get access express only but also Router() method within the express
 
@@ -58,35 +58,58 @@ router.post("/", async (req, res, next) => {
 
 //login user
 router.post("/login", async (req, res, next) => {
-  try {
-    const data = req.body;
-    const { email, password } = data;
-    const user = await getAnyUser({ email });
+  // try {
+  //   const data = req.body;
+  //   const { email, password } = data;
+  //   const user = await getAnyUser({ email });
 
+  //   if (user?._id) {
+  //     if (user.password !== password) {
+  //       return res.json({
+  //         status: ERROR,
+  //         message: "Invalid login details",
+  //       });
+  //     }
+  //     user.password = undefined;
+  //     return res.json({
+  //       status: SUCCESS,
+  //       message: "You have login successfully",
+  //       user,
+  //     });
+  //   }
+  //   return res.json({
+  //     status: ERROR,
+  //     message: "Login unsuccessful, User not found",
+  //   });
+  // } catch (error) {
+  //   next(error);
+  // }
+
+  //after hashing the password, to login
+  try {
+    const { email } = req.body;
+    const user = await getAnyUser({ email });
     if (user?._id) {
-      if (user.password !== password) {
+      //check if password is valid
+      const isPassMatch = comparePassword(req.body.password, user.password);
+      if (isPassMatch) {
+        user.password = undefined;
         return res.json({
-          status: ERROR,
-          message: "Invalid login details",
+          status: SUCCESS,
+          message: "Login Successful",
+          user,
         });
       }
-      user.password = undefined;
-      return res.json({
-        status: SUCCESS,
-        message: "You have login successfully",
-        user,
+      res.json({
+        status: ERROR,
+        message: "Invalid password",
       });
     }
-    return res.json({
+    res.json({
       status: ERROR,
-      message: "Login unsuccessful, User not found",
+      message: "User not found !",
     });
   } catch (error) {
-    if (error.message.includes("E11000 duplicate key error collection")) {
-      error.code = 200;
-      error.message =
-        "Already have user with these details, please use different details";
-    }
     next(error);
   }
 });
