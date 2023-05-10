@@ -1,6 +1,6 @@
 import express from "express";
 import { ERROR, SUCCESS } from "../Constant.js";
-import { createUser } from "../models/userModel/UserModel.js";
+import { createUser, getAnyUser } from "../models/userModel/UserModel.js";
 
 const router = express.Router(); // we want to define router here not app, because we not only want to get access express only but also Router() method within the express
 
@@ -40,4 +40,38 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+//login user
+router.post("/login", async (req, res, next) => {
+  try {
+    const data = req.body;
+    const { email, password } = data;
+    const user = await getAnyUser({ email });
+
+    if (user?._id) {
+      if (user.password !== password) {
+        return res.json({
+          status: ERROR,
+          message: "Invalid login details",
+        });
+      }
+      user.password = undefined;
+      return res.json({
+        status: SUCCESS,
+        message: "You have login successfully",
+        user,
+      });
+    }
+    return res.json({
+      status: ERROR,
+      message: "Login unsuccessful, User not found",
+    });
+  } catch (error) {
+    if (error.message.includes("E11000 duplicate key error collection")) {
+      error.code = 200;
+      error.message =
+        "Already have user with these details, please use different details";
+    }
+    next(error);
+  }
+});
 export default router;
