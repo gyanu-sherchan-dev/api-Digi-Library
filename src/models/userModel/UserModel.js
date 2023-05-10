@@ -7,6 +7,10 @@ export const createUser = (userData) => {
   return UserSchema(userData).save();
 };
 
+// export const getUserByEmail = (filter) => {
+//   return UserSchema.findOne({ filter });
+// };
+
 //get single user by user _id
 export const getUserById = (_id) => {
   return UserSchema.findById(_id); //if you use findById, it is fast search query than not using because you have to go through unindex value. Also, you can use ByEmail too or user by filter
