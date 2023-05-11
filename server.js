@@ -19,7 +19,9 @@ app.use(cors());
 
 //api routers
 import userRouter from "./src/routers/UserRouter.js";
+import bookRouter from "./src/routers/bookRouter.js";
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/book", bookRouter);
 
 //all uncaught request
 app.use("*", (req, res, next) => {
