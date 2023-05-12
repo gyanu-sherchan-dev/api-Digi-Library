@@ -23,10 +23,12 @@ const bookSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    borrowedBy: {
-      type: mongoose.Types.ObjectId,
-      ref: "users",
-    },
+    borrowedBy: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "users",
+      },
+    ],
   },
   {
     timeStamp: true,

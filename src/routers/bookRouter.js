@@ -1,9 +1,30 @@
 import express from "express";
-import { addBook, getBookByIsbn } from "../models/bookModel/BookModel.js";
+import {
+  addBook,
+  findBookAndDelete,
+  findBookAndUpdate,
+  getAllBooks,
+  getBookById,
+  getBookByIsbn,
+} from "../models/bookModel/BookModel.js";
 import { ERROR, SUCCESS } from "../Constant.js";
+import { getUserById } from "../models/userModel/UserModel.js";
 
 const baseEP = "/api/v1/book";
 const router = express.Router();
+
+//get books
+router.get("/", async (req, res, next) => {
+  try {
+    const books = await getAllBooks();
+    if (books) {
+      return res.json({ books });
+    }
+    return;
+  } catch (error) {
+    next(error);
+  }
+});
 
 //add a book
 router.post("/", async (req, res, next) => {
@@ -26,6 +47,58 @@ router.post("/", async (req, res, next) => {
       : res.json({
           status: ERROR,
           message: "Unsuccessfull to add book",
+        });
+  } catch (error) {
+    next(error);
+  }
+});
+
+//borrow book
+router.post("/borrow", async (req, res, next) => {
+  try {
+    const bookId = req.body.bookId;
+    const { authorization } = req.headers;
+    const book = await getBookById(bookId);
+    const user = await getUserById(authorization);
+    if (book?._id && user?._id) {
+      if (book.borrowedBy.length) {
+        return res.json({
+          status: ERROR,
+          message:
+            "This book has already been borrowed and will available once it has been returned",
+        });
+      }
+      const updateBook = await findBookAndUpdate(bookId, {
+        $push: { borrowedBy: user._id }, // Syntax to add userId to borrowedBy in Schema
+      });
+
+      return updateBook?._id
+        ? res.json({
+            status: SUCCESS,
+            message: "You have borrowed this book !",
+          })
+        : res.json({
+            status: ERROR,
+            message: "Something went wrong, please try again later",
+          });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+//delete book
+router.delete("/", async (req, res, next) => {
+  try {
+    const del = await findBookAndDelete(req.body.bookId);
+    del?._id
+      ? res.json({
+          status: SUCCESS,
+          message: "Book deleted Successfully",
+        })
+      : res.json({
+          statu: ERROR,
+          message: "Unable to delete Book",
         });
   } catch (error) {
     next(error);

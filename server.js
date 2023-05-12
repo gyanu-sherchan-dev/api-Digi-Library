@@ -20,8 +20,9 @@ app.use(cors());
 //api routers
 import userRouter from "./src/routers/UserRouter.js";
 import bookRouter from "./src/routers/bookRouter.js";
+import { isAuth } from "./src/middlewares/authMiddlewares.js";
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/book", bookRouter);
+app.use("/api/v1/book", isAuth, bookRouter);
 
 //all uncaught request
 app.use("*", (req, res, next) => {
