@@ -28,3 +28,8 @@ export const findBookAndUpdate = (_id, obj) => {
 export const findBookAndDelete = (_id) => {
   return BookSchema.findByIdAndDelete(_id);
 };
+
+//get borrowed book by specific user
+export const getBorrowedBooks = (userId) => {
+  return BookSchema.find({ borrowedBy: { $in: [userId] } }); // borrowedBy is our field which has array of userId, now whatever userId we pass from FE, and from the array whatever it match, it only gives detail of that. see mongoDB documentation.
+};

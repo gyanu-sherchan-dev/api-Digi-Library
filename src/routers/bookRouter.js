@@ -6,6 +6,7 @@ import {
   getAllBooks,
   getBookById,
   getBookByIsbn,
+  getBorrowedBooks,
 } from "../models/bookModel/BookModel.js";
 import { ERROR, SUCCESS } from "../Constant.js";
 import { getUserById } from "../models/userModel/UserModel.js";
@@ -21,6 +22,16 @@ router.get("/", async (req, res, next) => {
       return res.json({ books });
     }
     return;
+  } catch (error) {
+    next(error);
+  }
+});
+
+//get borrowed books by specific users
+router.get("/borrowedBooks", async (req, res, next) => {
+  try {
+    const books = await getBorrowedBooks(req.headers.authorization);
+    return res.json(books);
   } catch (error) {
     next(error);
   }
@@ -80,6 +91,34 @@ router.post("/borrow", async (req, res, next) => {
         : res.json({
             status: ERROR,
             message: "Something went wrong, please try again later",
+          });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+//Return a book
+router.patch("/return", async (req, res, next) => {
+  try {
+    const book = await getBookById(req.body._id);
+    const user = await getUserById(req.headers.authorization);
+    // console.log(book);
+
+    if (book?._id && user?._id) {
+      const updateBook = await findBookAndUpdate(book._id, {
+        $pull: { borrowedBy: user._id },
+      });
+      console.log(updateBook);
+      return updateBook?._id
+        ? res.json({
+            status: SUCCESS,
+            message: "You have returned this book",
+            updateBook,
+          })
+        : res.json({
+            status: ERROR,
+            message: "Unable to return book , please try again later",
           });
     }
   } catch (error) {
