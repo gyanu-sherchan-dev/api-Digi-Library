@@ -10,7 +10,11 @@ import {
 } from "../models/bookModel/BookModel.js";
 import { ERROR, SUCCESS } from "../Constant.js";
 import { getUserById } from "../models/userModel/UserModel.js";
-import { postTransaction } from "../models/transaction/TransactionModel.js";
+import {
+  findTransactionAndUpdate,
+  getTransactionByQuery,
+  postTransaction,
+} from "../models/transaction/TransactionModel.js";
 
 const baseEP = "/api/v1/book";
 const router = express.Router();
@@ -127,7 +131,12 @@ router.patch("/return", async (req, res, next) => {
     const user = await getUserById(req.headers.authorization);
     // console.log(book);
 
-    if (book?._id && user?._id) {
+    const transaction = await getTransactionByQuery(user?._id, book?.isbn);
+    const updateTransaction = await findTransactionAndUpdate(transaction?._id, {
+      returnDate: new Date(),
+    });
+
+    if (updateTransaction?.returnDate) {
       const updateBook = await findBookAndUpdate(book._id, {
         $pull: { borrowedBy: user._id },
       });

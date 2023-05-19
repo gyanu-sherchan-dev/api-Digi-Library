@@ -7,3 +7,14 @@ export const postTransaction = (obj) => {
 export const getAllTransactions = () => {
   return TransactionSchema.find();
 };
+
+export const getTransactionByQuery = (userId, isbn) => {
+  return TransactionSchema.findOne({
+    "borrowedBy.userId": { $in: userId },
+    "borrowedBook.isbn": { $in: isbn },
+  });
+};
+
+export const findTransactionAndUpdate = (_id, obj) => {
+  return TransactionSchema.findByIdAndUpdate(_id, obj, { new: true });
+};
