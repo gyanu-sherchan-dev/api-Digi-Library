@@ -23,7 +23,7 @@ export const getAnyUser = (filter) => {
 //update user, make sure _id is string and @updateDt is an object
 export const udateUserById = (_id, updateDt) => {
   // we going to receive 2 arguments the user _id and the updating data
-  return UserSchema.findByIdAndUpdate(_id, updateDt);
+  return UserSchema.findByIdAndUpdate(_id, updateDt, { new: true });
 };
 //delete user, again _id must be a string
 export const deleteUserById = (_id) => {

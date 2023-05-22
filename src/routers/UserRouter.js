@@ -1,6 +1,11 @@
 import express from "express";
 import { ERROR, SUCCESS } from "../Constant.js";
-import { createUser, getAnyUser } from "../models/userModel/UserModel.js";
+import {
+  createUser,
+  getAnyUser,
+  getUserById,
+  udateUserById,
+} from "../models/userModel/UserModel.js";
 import { comparePassword, hashPassword } from "../helpers/BcryptHelper.js";
 
 const router = express.Router(); // we want to define router here not app, because we not only want to get access express only but also Router() method within the express
@@ -108,6 +113,38 @@ router.post("/login", async (req, res, next) => {
     res.json({
       status: ERROR,
       message: "User not found !",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+//update password
+router.patch("/passwordUpdate", async (req, res, next) => {
+  try {
+    const user = await getUserById(req.headers.authorization);
+    const { currentPassword } = req.body;
+    const passMatched = comparePassword(currentPassword, user?.password);
+    console.log(passMatched);
+    if (passMatched) {
+      const hashPass = hashPassword(req.body.currentPassword);
+      if (hashPass) {
+        const update = await udateUserById(user._id, { password: hashPass });
+        if (update?._id) {
+          return res.json({
+            status: SUCCESS,
+            message: "Password update successfully",
+          });
+        }
+        return res.json({
+          status: ERROR,
+          message: "Unable to update password",
+        });
+      }
+    }
+    return res.json({
+      status: ERROR,
+      message: "Please enter the correct current password ",
     });
   } catch (error) {
     next(error);
