@@ -124,10 +124,11 @@ router.patch("/passwordUpdate", async (req, res, next) => {
   try {
     const user = await getUserById(req.headers.authorization);
     const { currentPassword } = req.body;
+
     const passMatched = comparePassword(currentPassword, user?.password);
     console.log(passMatched);
     if (passMatched) {
-      const hashPass = hashPassword(req.body.currentPassword);
+      const hashPass = hashPassword(req.body.newPassword);
       if (hashPass) {
         const update = await udateUserById(user._id, { password: hashPass });
         if (update?._id) {
